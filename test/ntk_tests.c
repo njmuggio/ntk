@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "ntk.h"
 #include "test_articles.h"
 #include "unity.h"
@@ -197,6 +200,67 @@ void test_WikipediaEmoji(void)
   TEST_ASSERT_TRUE(ntk_is_utf8((const char*)uni_hannover_html, uni_hannover_html_len));
 }
 
+void test_SanitizeInvalid(void)
+{
+  const char* pIn1 = "Scrunch-faced \xF8 fear baboon";
+  size_t inLen1 = strlen(pIn1);
+  const char* pExp1 = "Scrunch-faced \xEF\xBF\xBD fear baboon";
+  size_t expLen1 = strlen(pExp1);
+  size_t actualLen1;
+  char* pActual1 = ntk_sanitize_utf8(pIn1, inLen1, &actualLen1);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(pExp1, pActual1, expLen1);
+  TEST_ASSERT_EQUAL_size_t(expLen1, actualLen1);
+  free(pActual1);
+
+  const char* pIn2 = "Scrunch-faced \xF8\x80\x80\x80\xF9\x80\x80\x8F fear baboon";
+  size_t inLen2 = strlen(pIn2);
+  const char* pExp2 = "Scrunch-faced \xEF\xBF\xBD fear baboon";
+  size_t expLen2 = strlen(pExp2);
+  size_t actualLen2;
+  char* pActual2 = ntk_sanitize_utf8(pIn2, inLen2, &actualLen2);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(pExp2, pActual2, expLen2);
+  TEST_ASSERT_EQUAL_size_t(expLen2, actualLen2);
+  free(pActual2);
+
+  const char* pIn3 = "\xF8\x80\x80";
+  size_t inLen3 = strlen(pIn3);
+  const char* pExp3 = "\xEF\xBF\xBD";
+  size_t expLen3 = strlen(pExp3);
+  size_t actualLen3;
+  char* pActual3 = ntk_sanitize_utf8(pIn3, inLen3, &actualLen3);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(pExp3, pActual3, expLen3);
+  TEST_ASSERT_EQUAL_size_t(expLen3, actualLen3);
+  free(pActual3);
+
+  const char* pIn4 = "\xF8\x80 fear baboon";
+  size_t inLen4 = strlen(pIn4);
+  const char* pExp4 = "\xEF\xBF\xBD fear baboon";
+  size_t expLen4 = strlen(pExp4);
+  size_t actualLen4;
+  char* pActual4 = ntk_sanitize_utf8(pIn4, inLen4, &actualLen4);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(pExp4, pActual4, expLen4);
+  TEST_ASSERT_EQUAL_size_t(expLen4, actualLen4);
+  free(pActual4);
+
+  const char* pIn5 = "Scrunch-faced \x80";
+  size_t inLen5 = strlen(pIn5);
+  const char* pExp5 = "Scrunch-faced \xEF\xBF\xBD";
+  size_t expLen5 = strlen(pExp5);
+  size_t actualLen5;
+  char* pActual5 = ntk_sanitize_utf8(pIn5, inLen5, &actualLen5);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(pExp5, pActual5, expLen5);
+  TEST_ASSERT_EQUAL_size_t(expLen5, actualLen5);
+  free(pActual5);
+}
+
+void test_SanitizeValid(void)
+{
+  size_t len;
+  char* pActual = ntk_sanitize_utf8((const char*)uni_hannover_html, uni_hannover_html_len, &len);
+  TEST_ASSERT_EQUAL_CHAR_ARRAY(uni_hannover_html, pActual, uni_hannover_html_len);
+  TEST_ASSERT_EQUAL_size_t(uni_hannover_html_len, len);
+}
+
 int main(void)
 {
   UNITY_BEGIN();
@@ -215,5 +279,7 @@ int main(void)
   RUN_TEST(test_SurrogatePairs);
   RUN_TEST(test_InvalidStartBytes);
   RUN_TEST(test_WikipediaEmoji);
+  RUN_TEST(test_SanitizeInvalid);
+  RUN_TEST(test_SanitizeValid);
   return UNITY_END();
 }

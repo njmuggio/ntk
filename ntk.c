@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "ntk.h"
 
 enum states_is_utf8
@@ -51,12 +54,72 @@ int ntk_is_utf8(const char* pStr, size_t len)
   return state == start;
 }
 
+char* ntk_sanitize_utf8(const char* pStr, size_t len, size_t* pBufferLen)
+{
+  if (pStr == NULL || len == 0)
+  {
+    *pBufferLen = 0;
+    return NULL;
+  }
+
+  char* pRet = malloc(len);
+  *pBufferLen = len;
+
+  enum states_is_utf8 state = start;
+  int invalidFlag = 0;
+  size_t validStart = 0;
+  size_t sanitizedLen = 0;
+
+  for (size_t i = 0; i < len; ++i)
+  {
+    state = advance(pStr[i], state);
+    if (state == invalid && !invalidFlag)
+    {
+      invalidFlag = 1;
+
+      // Copy last-seen good data
+      if (*pBufferLen - sanitizedLen < i - validStart + 3) // +3 for U+FFFD
+      {
+        *pBufferLen = sanitizedLen + i - validStart + 3;
+        pRet = realloc(pRet, *pBufferLen);
+      }
+
+      memcpy(pRet + sanitizedLen, pStr + validStart, i - validStart);
+      sanitizedLen += i - validStart;
+
+      // Insert U+FFFD
+      pRet[sanitizedLen++] = '\xEF';
+      pRet[sanitizedLen++] = '\xBF';
+      pRet[sanitizedLen++] = '\xBD';
+    }
+    else if (state != invalid && invalidFlag)
+    {
+      invalidFlag = 0;
+      validStart = i;
+    }
+  }
+
+  if (!invalidFlag && validStart < len)
+  {
+    if (*pBufferLen - sanitizedLen < len - validStart)
+    {
+      *pBufferLen = sanitizedLen + len - validStart;
+      pRet = realloc(pRet, *pBufferLen);
+    }
+
+    memcpy(pRet + sanitizedLen, pStr + validStart, len - validStart);
+    sanitizedLen += len - validStart;
+  }
+
+  *pBufferLen = sanitizedLen;
+  return pRet;
+}
+
 static enum states_is_utf8 advance(const char c, const enum states_is_utf8 state)
 {
   switch (state)
   {
     case invalid:
-      return invalid;
     case start:
       if ((c & hi1) == none)
       {
