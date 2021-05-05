@@ -1,6 +1,10 @@
 #ifndef NTK_LIBRARY_H
 #define NTK_LIBRARY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 /**
@@ -21,5 +25,9 @@ int ntk_is_utf8(const char* pStr, size_t len);
  * @return Sanitized copy of pStr. If pStr is NULL, NULL is returned.
  */
 char* ntk_sanitize_utf8(const char* pStr, size_t len, size_t* pBufferLen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //NTK_LIBRARY_H
