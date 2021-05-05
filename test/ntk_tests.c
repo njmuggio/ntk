@@ -194,9 +194,6 @@ void test_InvalidStartBytes(void)
 
 void test_WikipediaEmoji(void)
 {
-  TEST_ASSERT_TRUE(ntk_is_utf8((const char*)wikipedia_emoji_html, wikipedia_emoji_html_len));
-  TEST_ASSERT_TRUE(ntk_is_utf8((const char*)wikipedia_till_lindemann_html, wikipedia_till_lindemann_html_len));
-  TEST_ASSERT_TRUE(ntk_is_utf8((const char*)wikipedia_tudor_dynasty_html, wikipedia_tudor_dynasty_html_len));
   TEST_ASSERT_TRUE(ntk_is_utf8((const char*)uni_hannover_html, uni_hannover_html_len));
 }
 

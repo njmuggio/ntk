@@ -2,11 +2,11 @@
 
 ## Current Features
 
-* UTF-8 validation (classification only)
+* UTF-8 validation
+* UTF-8 sanitization
 
 ## Planned Features
 
-* UTF sanitization
 * Support for UTF-16 and UTF-32
 * Streaming sanitizers
 * Escaping for HTML, C, URLs, etc.
