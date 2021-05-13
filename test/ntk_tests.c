@@ -192,7 +192,7 @@ void test_InvalidStartBytes(void)
   TEST_ASSERT_FALSE(ntk_is_utf8(&ff, 1));
 }
 
-void test_WikipediaEmoji(void)
+void test_HannoverHtml(void)
 {
   TEST_ASSERT_TRUE(ntk_is_utf8((const char*)uni_hannover_html, uni_hannover_html_len));
 }
@@ -275,7 +275,7 @@ int main(void)
   RUN_TEST(test_OverlongSequences);
   RUN_TEST(test_SurrogatePairs);
   RUN_TEST(test_InvalidStartBytes);
-  RUN_TEST(test_WikipediaEmoji);
+  RUN_TEST(test_HannoverHtml);
   RUN_TEST(test_SanitizeInvalid);
   RUN_TEST(test_SanitizeValid);
   return UNITY_END();
