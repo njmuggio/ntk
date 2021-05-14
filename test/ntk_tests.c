@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "ntk.h"
 #include "test_articles.h"
@@ -258,6 +259,27 @@ void test_SanitizeValid(void)
   TEST_ASSERT_EQUAL_size_t(uni_hannover_html_len, len);
 }
 
+void test_SanitizeFuzz(void)
+{
+  srand(time(NULL));
+  size_t origLen = 536870912;
+  char* pBuf = malloc(origLen);
+  if (pBuf != NULL)
+  {
+    for (size_t i = 0; i < origLen / sizeof(int); i++)
+    {
+      int val = rand();
+      memcpy(pBuf + i * sizeof(int), &val, sizeof(int));
+    }
+
+    size_t len;
+    char* pActual = ntk_sanitize_utf8(pBuf, origLen, &len);
+    TEST_ASSERT_NOT_NULL(pActual);
+
+    free(pBuf);
+  }
+}
+
 int main(void)
 {
   UNITY_BEGIN();
@@ -278,5 +300,7 @@ int main(void)
   RUN_TEST(test_HannoverHtml);
   RUN_TEST(test_SanitizeInvalid);
   RUN_TEST(test_SanitizeValid);
+
+  RUN_TEST(test_SanitizeFuzz);
   return UNITY_END();
 }
