@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 project(ntk VERSION 0.1.2 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
